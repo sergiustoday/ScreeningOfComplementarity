@@ -159,6 +159,12 @@ However, we will show that this is wrong. And that one can sometimes lose a very
 \section{Description of experiments and main results}
 The main results are.
 
+First we find statistically significant screening triples for each dataset. For ARR we found 161 such triples, for BOS 11 triples, for DIA only one triplet. In total, there are 174 triples of screening. For each of the triples, we know which pair of complementary features is being screened by which feature; how accurate the model is on the three features and on the two features, and, accordingly, what the screening factor is.
+
+How do we determine statistically significant triples? We randomly divide the dataset into training and test samples, and for this division we separately count the accuracy of two and three features. We accumulate them. Then we count the confidence intervals for each of the two accuracies. When they stop overlapping, it means that we broke through the statistical significance, and the triple is statistically significant. 
+
+How do we calculate the screening coefficient for a statistically significant triplet? Since we already have confidence intervals for each of the calculations - for two features and for three features - so there are two expected value. We simply divide one expected value by the other and get the screening coefficient. 
+
 \begin{center}
 \begin{tabular}{ |c||c|c|c|c|c|c|c|c|c| } 
   \hline

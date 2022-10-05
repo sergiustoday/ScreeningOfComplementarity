@@ -33,6 +33,27 @@ There are no information-theoretic definitions and methods for calculating compl
 
 \section{Introduction}
 
+There is now such a machine learning pipeline that dimensionality reduction is sometimes recommended before training a model. As will be shown below, there is a consensus in the literature that if we have few samples in the dataset or/and insufficient computational resources, we should consider dimensionality reduction. Otherwise, you don't have to waste any time on it. This paper has shown that this is not true.  Even if we have a sufficient number of instances in the dataset (i.e. the number of rows is much larger than the number of columns) and enough computing resources, dimensionality reduction can still be useful, because without it we can lose a lot of accuracy. This does not happen very often, but if it does happen, then the explanatory power may decrease several times compared to using dimensionality reduction. In this paper we will show that this happens because of the so-called phenomenon of screening complementarity of the features. 
+
+The third section considers the already known phenomenon of complementarity of features and how it is taken into account in various methods of feature selection. The fourth section considers the new phenomenon of screening of the complementarity of features and gives illustrative, clear examples of this phenomenon. 
+
+The fifth section describes an experiment and its results showing what loss in explanatory power can occur due to this phenomenon on real datasets. It was also found that this effect of loss of explanatory power is stronger the less learned the domain is.
+
+\section{When it is recommended to use dimensionality reduction }
+
+Many seminal reviews [2011, 2017] and the textbook [2020] argue that the main reasons to use feature selection are (I) to reduce computational and storage costs (II) to create a cleaner, more interpretable, compact model (III) to improve performance metrics in general and learning accuracy in particular. But how can dimensionality reduction in general and feature selection in particular affect accuracy? 
+
+The reasons why irrelevant and/or redundant features can lead to a decrease in accuracy are almost always not given, but sometimes still the logical chain is explicated "Also, with a large number of features, learning models tend to overfit, which may cause performance degradation on unseen data." [2017] Thus, the only reason for possible accuracy degradation with sufficient time and computational resources when using superfluous features is indicated by overfitting. Therefore, it seems plausible that in the absence of overfitting under conditions of sufficient time and computational resources, features are not superfluous: in an ideal situation, adding features will not reduce accuracy, but it may not lead to improved accuracy. 
+
+The latter thesis is almost never stated explicitly, apparently because it is considered self-evident. 
+Sometimes, however, this idea is expressed [2011] (in a slightly distorted form): "In theory, increasing the size of the feature vector is expected to provide more discriminating power.
+
+Consequently, if we have a dataset where the amount of overfitting is negligible, and we have enough time and computational resources, then it means that dimensionality reduction can not be used. From a practical point of view for an engineer, this means that investing time in learning and implementing dimensionality reduction methods in this case is not worthwhile. 
+
+However, we will show that this is wrong. And that one can sometimes lose a very significant amount in accuracy by not using feature selection, even if we have a dataset containing orders of magnitude more instances than features (so overfitting will be insignificant), and we have any sufficient amount of time and computational resources.
+
+\section{The phenomenon of  complementarity of the features}
+
 In machine learning, it is quite common to find a situation where some two
 both indicators individually can very poorly predict the value of the target variable, and
 together, they can predict very well. This property of indicators is called
@@ -52,7 +73,7 @@ complementarity is not the only possibility. There are also formalizations
 using rank correlations [10, 11] and building two-tiered decision trees [12,
 13].
 
-\section{The phenomenon of screening complementarity of indicators}
+\section{The phenomenon of screening complementarity of features}
 
 Moreover, it can be shown that the formalization of the phenomenon of complementarity through
 in some cases, constructing a two-tiered tree is even preferable to a theoretical one.-
@@ -84,77 +105,6 @@ the accuracy of the model becomes higher. This is demonstrated on a synthetic da
 this opens up opportunities for designing and thoroughly testing the selection algorithm.
 indicators that no longer take into account the above-mentioned triad, but the "relevance" quartet —
 redundancy — complementarity — complementarity screening".
-
-
-\section{Иллюстративный пример про недостатки теоретико-информационной дефиниции}
-
-Вот ЗДЕСЬ, собственно, сам иллюстративный пример. Его суть заключается в том, чтобы показать, что 
-\[JMI_{Score} = \sum_{i=1}^N R(x_i) -
-\sum_{i=1}^N \sum_{j=i+1}^N Iz(x_i, x_j) +
-\sum_{i=1}^N \sum_{j=i+1}^N C(x_i, x_j,z)  
-\]
-\[R(x) = MI(x,z)\]
-\[Iz(x,y) = MI(x,y)\]
-\[C(x,y,z) = MI(xy,z) - MI(x,z) - MI(y,z) + MI(x,y)\]\[JMI_{Score}^{Ekr} = \sum_{i=1}^N R(x_i) -
-\sum_{i=1}^N \sum_{j=i+1}^N Iz(x_i, x_j) +
-\sum_{i=1}^N \sum_{j=i+1}^N C(x_i, x_j,z)-  
-\sum_{i=1}^N \sum_{j=i+1}^N \sum_{k=1; k \neq i,j}^N E(x_i, x_j,x_k,z)
-\]
-
-\[E(x,y,e,z) = \begin{cases}
-  MI(xy,z) - \max\limits_{\{n=1,..,N; n \neq i,j \}} (MI(xn,z), MI(yn,z)),  & \mbox{если } e \mbox{ экр. комп. пару } x,y \\
-  0, & \mbox{в противном случае }
-\end{cases} \]
-
-
-Приведем иллюстративный пример, показывающий, что использование метрик, основанных на взаимной информации (как совместной, так и условной), не позволяет «ловить» эффект экранирования комплементарности показателей. Более того, это будет происходить вне зависимости от того, какой способ перебора наборов показателей будем выбран: даже при переборе всех наборов заданного размера такой эффект будет наблюдаться. Это происходит именно из-за того, что для каждого из наборов используется «жадный» метод построения дерева. И действительно, если бы для каждого из набора показателей использовался бы полный перебор всех возможных деревьев, то оценки, которые дают метрики, основанные на взаимной информации, были бы справедливы. Но из-за жадности алгоритмов построения деревьев такие метрики могут давать неадекватный результат. 
-
-\begin{center}
-\begin{tabular}{ |c||c|c|c|c|c| } 
-  \hline
-  № & X & Y & E & N & Z \\
- \hline
- \hline
- 1 & 0 & 0 & 0 & 0 & 0 \\ 
- 2 & 1 & 0 & 0 & 0 & 1 \\ 
- 3 & 1 & 0 & 0 & 0 & 1 \\ 
- 4 & 0 & 0 & 1 & 0 & 0 \\ 
- 5 & 0 & 0 & 1 & 0 & 0 \\ 
- 6 & 0 & 1 & 0 & 0 & 1 \\ 
- 7 & 0 & 1 & 0 & 0 & 1 \\ 
- \hline
-\end{tabular}
-\end{center}
-
-В итоге если всё аккуратно посчитать, то получатся примерно следующие результаты:
-
-\begin{center}
-\begin{tabular}{ |c||c|c| } 
-  \hline
-  Threesome & Tree Score & JMI \\
- \hline
- \hline
- XYE & 0.86 & 1.12 \\ 
- XYN & 1.00 & 0.99 \\ 
- XEN & 0.86 & 0.59 \\ 
- YEN & 0.86 & 0.59 \\ 
- \hline
-\end{tabular}
-\end{center}
-
-
-\section{When it is recommended to use dimensionality reduction }
-
-Many seminal reviews [2011, 2017] and the textbook [2020] argue that the main reasons to use feature selection are (I) to reduce computational and storage costs (II) to create a cleaner, more interpretable, compact model (III) to improve performance metrics in general and learning accuracy in particular. But how can dimensionality reduction in general and feature selection in particular affect accuracy? 
-
-The reasons why irrelevant and/or redundant features can lead to a decrease in accuracy are almost always not given, but sometimes still the logical chain is explicated "Also, with a large number of features, learning models tend to overfit, which may cause performance degradation on unseen data." [2017] Thus, the only reason for possible accuracy degradation with sufficient time and computational resources when using superfluous features is indicated by overfitting. Therefore, it seems plausible that in the absence of overfitting under conditions of sufficient time and computational resources, features are not superfluous: in an ideal situation, adding features will not reduce accuracy, but it may not lead to improved accuracy. 
-
-The latter thesis is almost never stated explicitly, apparently because it is considered self-evident. 
-Sometimes, however, this idea is expressed [2011] (in a slightly distorted form): "In theory, increasing the size of the feature vector is expected to provide more discriminating power.
-
-Consequently, if we have a dataset where the amount of overfitting is negligible, and we have enough time and computational resources, then it means that dimensionality reduction can not be used. From a practical point of view for an engineer, this means that investing time in learning and implementing dimensionality reduction methods in this case is not worthwhile. 
-
-However, we will show that this is wrong. And that one can sometimes lose a very significant amount in accuracy by not using feature selection, even if we have a dataset containing orders of magnitude more instances than features (so overfitting will be insignificant), and we have any sufficient amount of time and computational resources.
 
 \section{Description of experiments and main results}
 The main results are.
